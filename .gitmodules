@@ -1,0 +1,3 @@
+[submodule "libs/ros2_config"]
+	path = libs/ros2_config
+	url = https://github.com/bertan-karacora/ros2_config

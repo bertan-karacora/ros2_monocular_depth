@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+    <name>ros2_monocular_depth</name>
+    <version>0.0.1</version>
+    <description>ROS 2 package for monocular depth estimation using Depth Anything V2</description>
+    <license>MIT</license>
+    <maintainer email="bertan-karacora@gmail.com">Bertan Karacora</maintainer>
+    <export>
+        <build_type>ament_python</build_type>
+    </export>
+</package>

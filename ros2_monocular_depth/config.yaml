@@ -1,0 +1,24 @@
+path_dir_weights: /home/bertan/colcon_ws/src/ros2_monocular_depth/ros2_monocular_depth/resources/weights
+path_dir_onnx: /home/bertan/colcon_ws/src/ros2_monocular_depth/ros2_monocular_depth/resources/models_onnx
+path_dir_engines: /home/bertan/colcon_ws/src/ros2_monocular_depth/ros2_monocular_depth/resources/engines
+models:
+    depth_anything_v2_metric_hypersim_vits:
+        kwargs:
+            encoder: vits
+            features: 64
+            out_channels: [48, 96, 192, 384]
+    depth_anything_v2_metric_hypersim_vitb:
+        kwargs:
+            encoder: vitb
+            features: 128
+            out_channels: [96, 192, 384, 768]
+    depth_anything_v2_metric_hypersim_vitl:
+        kwargs:
+            encoder: vitl
+            features: 256
+            out_channels: [256, 512, 1024, 1024]
+    depth_anything_v2_metric_hypersim_vitg:
+        kwargs:
+            encoder: vitg
+            features: 384
+            out_channels: [1536, 1536, 1536, 1536]

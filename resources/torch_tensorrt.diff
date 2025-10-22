@@ -1,0 +1,162 @@
+diff --git a/WORKSPACE b/WORKSPACE
+index 41b6abb2f..a27a1fed8 100644
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -1,5 +1,10 @@
++# Bazel workspaces for jetpack version 4 and 5 exist. This is an attempt on getting it working with jetpack 6.
++# See https://github.com/dusty-nv/jetson-containers/blob/master/packages/pytorch/torch_tensorrt/WORKSPACE.jp46
++# See https://github.com/pytorch/TensorRT/blob/v2.5.0-rc2/toolchains/jp_workspaces/WORKSPACE.jp50
++
+ workspace(name = "Torch-TensorRT")
+ 
++load("@bazel_tools//tools/build_defs/repo:git.bzl", "git_repository")
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+ 
+ http_archive(
+@@ -36,46 +41,14 @@ http_archive(
+ # External dependency for torch_tensorrt if you already have precompiled binaries.
+ local_repository(
+     name = "torch_tensorrt",
+-    path = "/opt/conda/lib/python3.8/site-packages/torch_tensorrt",
++    path = "/opt/conda/lib/python3.10/site-packages/torch_tensorrt",
+ )
+ 
+ # CUDA should be installed on the system locally
+ new_local_repository(
+     name = "cuda",
+     build_file = "@//third_party/cuda:BUILD",
+-    path = "/usr/local/cuda-12.1/",
+-)
+-
+-#############################################################################################################
+-# Tarballs and fetched dependencies (default - use in cases when building from precompiled bin and tarballs)
+-#############################################################################################################
+-
+-http_archive(
+-    name = "libtorch",
+-    build_file = "@//third_party/libtorch:BUILD",
+-    strip_prefix = "libtorch",
+-    urls = ["https://download.pytorch.org/libtorch/test/cu121/libtorch-cxx11-abi-shared-with-deps-2.3.1%2Bcu121.zip"],
+-)
+-
+-http_archive(
+-    name = "libtorch_pre_cxx11_abi",
+-    build_file = "@//third_party/libtorch:BUILD",
+-    strip_prefix = "libtorch",
+-    urls = ["https://download.pytorch.org/libtorch/test/cu121/libtorch-shared-with-deps-2.3.1%2Bcu121.zip"],
+-)
+-
+-# Download these tarballs manually from the NVIDIA website
+-# Either place them in the distdir directory in third_party and use the --distdir flag
+-# or modify the urls to "file:///<PATH TO TARBALL>/<TARBALL NAME>.tar.gz
+-
+-http_archive(
+-    name = "tensorrt",
+-    build_file = "@//third_party/tensorrt/archive:BUILD",
+-    sha256 = "a5cd2863793d69187ce4c73b2fffc1f470ff28cfd91e3640017e53b8916453d5",
+-    strip_prefix = "TensorRT-10.0.1.6",
+-    urls = [
+-        "https://developer.nvidia.com/downloads/compute/machine-learning/tensorrt/10.0.1/tars/TensorRT-10.0.1.6.Linux.x86_64-gnu.cuda-12.4.tar.gz",
+-    ],
++    path = "/usr/local/cuda-12.4/",
+ )
+ 
+ ####################################################################################
+@@ -89,23 +62,24 @@ http_archive(
+ # x86_64 python distribution. If using NVIDIA's version just point to the root of the package
+ # for both versions here and do not use --config=pre-cxx11-abi
+ 
+-#new_local_repository(
+-#    name = "libtorch",
+-#    path = "/usr/local/lib/python3.6/dist-packages/torch",
+-#    build_file = "third_party/libtorch/BUILD"
+-#)
+-
+-#new_local_repository(
+-#    name = "libtorch_pre_cxx11_abi",
+-#    path = "/usr/local/lib/python3.6/dist-packages/torch",
+-#    build_file = "third_party/libtorch/BUILD"
+-#)
+-
+-#new_local_repository(
+-#   name = "tensorrt",
+-#   path = "/usr/",
+-#   build_file = "@//third_party/tensorrt/local:BUILD"
+-#)
++new_local_repository(
++   name = "libtorch",
++   path = "/opt/venv/lib/python3.10/site-packages/torch",
++   build_file = "third_party/libtorch/BUILD"
++)
++
++# NOTE: Unused on aarch64-jetson with NVIDIA provided PyTorch distribu†ion
++new_local_repository(
++   name = "libtorch_pre_cxx11_abi",
++   path = "/opt/venv/lib/python3.10/site-packages/torch",
++   build_file = "third_party/libtorch/BUILD"
++)
++
++new_local_repository(
++  name = "tensorrt",
++  path = "/usr/",
++  build_file = "@//third_party/tensorrt/local:BUILD"
++)
+ 
+ #########################################################################
+ # Development Dependencies (optional - comment out on aarch64)
+diff --git a/setup.py b/setup.py
+index 7e3084748..90584e862 100644
+--- a/setup.py
++++ b/setup.py
+@@ -152,6 +152,8 @@ if platform.uname().processor == "aarch64":
+             JETPACK_VERSION = "4.6"
+         elif version == "5.0":
+             JETPACK_VERSION = "5.0"
++        elif version == "6.0":
++            JETPACK_VERSION = "6.0"
+ 
+     if not JETPACK_VERSION:
+         warnings.warn(
+@@ -207,6 +209,9 @@ def build_libtorchtrt_pre_cxx11_abi(
+     elif JETPACK_VERSION == "5.0":
+         cmd.append("--platforms=//toolchains:jetpack_5.0")
+         print("Jetpack version: 5.0")
++    elif JETPACK_VERSION == "6.0":
++        cmd.append("--platforms=//toolchains:jetpack_6.0")
++        print("Jetpack version: 6.0")
+ 
+     if CI_BUILD:
+         cmd.append("--platforms=//toolchains:ci_rhel_x86_64_linux")
+diff --git a/toolchains/BUILD b/toolchains/BUILD
+index aa6486d07..84f7a48a1 100644
+--- a/toolchains/BUILD
++++ b/toolchains/BUILD
+@@ -35,6 +35,15 @@ platform(
+     ],
+ )
+ 
++platform(
++    name = "jetpack_6.0",
++    constraint_values = [
++        "@platforms//os:linux",
++        "@platforms//cpu:aarch64",
++        "@//toolchains/jetpack:6.0",
++    ],
++)
++
+ platform(
+     name = "ci_rhel_x86_64_linux",
+     constraint_values = [
+diff --git a/toolchains/jetpack/BUILD b/toolchains/jetpack/BUILD
+index fa5ddd2c8..d62542cb1 100644
+--- a/toolchains/jetpack/BUILD
++++ b/toolchains/jetpack/BUILD
+@@ -11,3 +11,8 @@ constraint_value(
+     name = "4.6",
+     constraint_setting = ":jetpack",
+ )
++
++constraint_value(
++    name = "6.0",
++    constraint_setting = ":jetpack",
++)
