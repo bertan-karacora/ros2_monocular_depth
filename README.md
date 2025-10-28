@@ -10,9 +10,9 @@ Note: This is a public, stripped-down version of a private repository. It may de
 ![docs/images/screenshot4.png](docs/images/screenshot4.png)
 *Figure 2: Colored point cloud*
 
-![docs/images/screenshot5.png](docs/images/screenshot5.png)                                                                   *Figure 3: View from an orthogonal direction. The depth for the ground plane is not estimated accurately out of the box. Image rectification might mitigate this but the domain gap will still be large, since the model is not trained on images with very large FOV. Finetuning the model or applying some post-hoc transform might be worth considering.*
+![docs/images/screenshot5.png](docs/images/screenshot5.png)                                                                   *Figure 3: View from an orthogonal direction. The depth for the ground plane is not estimated accurately out of the box. Image rectification might mitigate this but the domain gap will still be large, since the model is not trained on images with very large FOV. Finetuning the model or applying some post-hoc transform could mitigate this.*
 
-![docs/images/screenshot6.png](docs/images/screenshot6.png) *Figure 4: Rectification and comparison with measured depth from an active stereo IR camera. Top left: Raw image of fisheye lense camera rectified and transformed to the domain of the depth camera. Top right: Measured depth. Bottom right: Inferred depth. Bottom left: Absolute Relative Error (AbsRel).*
+![docs/images/screenshot6.png](docs/images/screenshot6.png) *Figure 4: Comparison of inferred depth with measured depth from an active stereo IR camera. Top left: Raw image. Top right: Measured depth. Bottom right: Inferred depth. Bottom left: Absolute Relative Error (AbsRel).*
 
 ## Setup
 
